@@ -7,6 +7,7 @@ model_wrapper = Model('yolo26n.pt')
 model_wrapper.validate()
 model_wrapper.load_model()
 model = model_wrapper.model
+
 CONF_THRESHOLD = 0.3
 
 detector = Detect(model=model, conf_threshold=CONF_THRESHOLD)
