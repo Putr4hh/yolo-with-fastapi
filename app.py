@@ -9,7 +9,6 @@ model_wrapper.load_model()
 model = model_wrapper.model
 CONF_THRESHOLD = 0.3
 
-# Detector and lock for thread-safe model inference
 detector = Detect(model=model, conf_threshold=CONF_THRESHOLD)
 model_lock = threading.Lock()
 
@@ -31,12 +30,12 @@ def gen_frames():
         if not success:
             break
 
-        # Run detection on the frame (protected by model_lock)
         detected_frame = None
         try:
-            with model.lock:
+            with model_lock:
                 detected_frame = detector.detect(frame)
-        except Exception:
+        except Exception as e:
+            logging.exception(f"Error during detection: {e}")
             detected_frame = None
 
         output_frame = detected_frame if detected_frame is not None else frame
@@ -56,7 +55,7 @@ async def index():
         "<head><title>Video Streaming</title></head>"
         "<body>"
         "<h1>Streaming Kamera (FastAPI)</h1>"
-        "<img src=\"/video_feed\" width=\"640\" height=\"480\"/>"
+        "<img src=\"/video_feed\" width=\"1000\" height=\"600\"/>"
         "</body></html>"
     ))
 
