@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse, HTMLResponse
+from fastapi.staticfiles import StaticFiles
 import cv2, logging, threading
+from pathlib import Path
 
 from utils import Model, Detect
 model_wrapper = Model('yolo26n.pt')
@@ -49,16 +51,24 @@ def gen_frames():
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
 
-@app.get('/', response_class=HTMLResponse)
+
+BASE_DIR = Path(__file__).resolve().parent
+UI_DIR = BASE_DIR / "ui"
+INDEX_HTML_PATH = UI_DIR / "index.html"
+
+app.mount("/ui", StaticFiles(directory=UI_DIR), name="ui")
+
+
+@app.get("/", response_class=HTMLResponse)
 async def index():
-    return HTMLResponse(content=(
-        "<html>"
-        "<head><title>Video Streaming</title></head>"
-        "<body>"
-        "<h1>Streaming Kamera (FastAPI)</h1>"
-        "<img src=\"/video_feed\" width=\"1000\" height=\"600\"/>"
-        "</body></html>"
-    ))
+    """
+    Mengembalikan halaman utama dari folder ui.
+    Placeholder __CONF_THRESHOLD__ di dalam HTML akan diganti dengan nilai
+    CONF_THRESHOLD dari Python.
+    """
+    html = INDEX_HTML_PATH.read_text(encoding="utf-8")
+    html = html.replace("__CONF_THRESHOLD__", str(CONF_THRESHOLD))
+    return HTMLResponse(content=html)
 
 @app.get('/video_feed')
 def video_feed():
