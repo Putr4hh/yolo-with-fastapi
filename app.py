@@ -1,8 +1,6 @@
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse, HTMLResponse
-from fastapi.staticfiles import StaticFiles
 import cv2, logging, threading
-from pathlib import Path
 
 from utils import Model, Detect
 model_wrapper = Model('yolo26n.pt')
@@ -10,7 +8,7 @@ model_wrapper.validate()
 model_wrapper.load_model()
 model = model_wrapper.model
 
-CONF_THRESHOLD = 0.7
+CONF_THRESHOLD = 0.3
 
 detector = Detect(model=model, conf_threshold=CONF_THRESHOLD)
 model_lock = threading.Lock()
@@ -51,24 +49,16 @@ def gen_frames():
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
 
-BASE_DIR = Path(__file__).resolve().parent
-TEMPLATES_DIR = BASE_DIR / "templates"
-STATIC_DIR = BASE_DIR / "static"
-INDEX_HTML_PATH = TEMPLATES_DIR / "index.html"
-
-app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
-
-
 @app.get('/', response_class=HTMLResponse)
 async def index():
-    """
-    Mengembalikan halaman HTML dari file templates/index.html.
-    Placeholder __CONF_THRESHOLD__ di dalam HTML akan diganti dengan nilai
-    CONF_THRESHOLD dari Python.
-    """
-    html = INDEX_HTML_PATH.read_text(encoding="utf-8")
-    html = html.replace("__CONF_THRESHOLD__", str(CONF_THRESHOLD))
-    return HTMLResponse(content=html)
+    return HTMLResponse(content=(
+        "<html>"
+        "<head><title>Video Streaming</title></head>"
+        "<body>"
+        "<h1>Streaming Kamera (FastAPI)</h1>"
+        "<img src=\"/video_feed\" width=\"1000\" height=\"600\"/>"
+        "</body></html>"
+    ))
 
 @app.get('/video_feed')
 def video_feed():
