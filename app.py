@@ -10,7 +10,7 @@ model_wrapper.validate()
 model_wrapper.load_model()
 model = model_wrapper.model
 
-CONF_THRESHOLD = 0.3
+CONF_THRESHOLD = 0.1
 
 detector = Detect(model=model, conf_threshold=CONF_THRESHOLD)
 model_lock = threading.Lock()
