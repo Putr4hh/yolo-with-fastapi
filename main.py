@@ -11,15 +11,13 @@ if __name__ == "__main__":
     m.validate()
     m.load_model()
 
-    # Running camera
+    # Running Camera
     cam = Camera()
     try:
         cam.initialize()
     except Exception as e:
-        print('Gagal initialize')
-        exit(1)
+        print(f'gagal inisialisasi camera: ', e)
 
-    # Detect
     d = Detect(m.model)
 
     try:
@@ -28,15 +26,15 @@ if __name__ == "__main__":
             if not ret:
                 break
 
-            results = d.Detect(frame)
+            results = d.detect(frame)
 
-            cv2.imshow('HEHE', results)
+            cv2.imshow('hola', results)
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
-    
+
     except Exception as e:
-        print('Error menampilan hasil:', e)
+        print(f'error menampilkan hasil:', e)
         exit(1)
 
     finally:
