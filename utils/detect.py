@@ -1,3 +1,4 @@
+from enum import auto
 import logging
 import time
 import cv2
